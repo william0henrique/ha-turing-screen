@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">HA Turing Screen</title><desc id="desc">Painel Home Assistant para Turing Smart Screen, com estética tecnológica azul e ciano.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#071426"/><stop offset="1" stop-color="#101b39"/></linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#48e4ff"/><stop offset="1" stop-color="#4285ff"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#76caff" stroke-opacity=".09"/></pattern>
+    <filter id="glow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="360" rx="28" fill="url(#bg)"/><rect width="1200" height="360" rx="28" fill="url(#grid)"/>
+  <circle cx="1000" cy="180" r="190" fill="#1c5fff" opacity=".08"/><circle cx="1000" cy="180" r="130" fill="none" stroke="#46dfff" stroke-opacity=".18"/>
+  <g transform="translate(790 78)" filter="url(#glow)">
+    <rect x="0" y="0" width="310" height="204" rx="18" fill="#09101e" stroke="url(#cyan)" stroke-width="3"/>
+    <rect x="13" y="13" width="284" height="178" rx="10" fill="#0d1b31" stroke="#264a71"/>
+    <path d="M32 53H278M32 160H278" stroke="#25486a"/>
+    <text x="34" y="42" fill="#75eaff" font-family="monospace" font-size="15">HOME ASSISTANT / STATUS</text>
+    <text x="34" y="92" fill="#f0f8ff" font-family="monospace" font-size="32" font-weight="700">18:42</text>
+    <circle cx="44" cy="123" r="6" fill="#4de6a5"/><text x="59" y="128" fill="#b4cbe2" font-family="monospace" font-size="14">CASA ONLINE</text>
+    <path d="M205 108v30m-10-20h20m-16-8 12 16m0-16-12 16" stroke="#55dfff" stroke-width="2" fill="none"/>
+    <rect x="33" y="174" width="50" height="5" rx="2" fill="#43dcff"/><rect x="91" y="174" width="50" height="5" rx="2" fill="#4285ff"/><rect x="149" y="174" width="50" height="5" rx="2" fill="#43dcff"/>
+  </g>
+  <g transform="translate(76 74)">
+    <rect x="0" y="0" width="7" height="194" rx="3" fill="url(#cyan)"/>
+    <text x="31" y="27" fill="#59e4ff" font-family="monospace" font-size="17" letter-spacing="4">SMART HOME DISPLAY</text>
+    <text x="31" y="91" fill="#f4f8ff" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">HA Turing</text>
+    <text x="31" y="151" fill="#f4f8ff" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Screen<span fill="#4bdfff">.</span></text>
+    <text x="32" y="187" fill="#a7bed7" font-family="Arial, Helvetica, sans-serif" font-size="19">Home Assistant • Python • USB Display</text>
+  </g>
+</svg>

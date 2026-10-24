@@ -1,0 +1,7 @@
+# Somente o necessario para este painel + a biblioteca de comunicacao da tela.
+# (Nao instale o requirements.txt completo do projeto turing-smart-screen-python:
+#  ele inclui pacotes do monitor de PC que exigem git e nao sao usados aqui.)
+pyserial>=3.5
+Pillow>=10
+numpy<2.4   # versoes novas do NumPy exigem CPU com X86_V2; esta faixa roda em CPUs antigas
+requests>=2.31

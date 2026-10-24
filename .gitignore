@@ -1,0 +1,11 @@
+ha_screen.ini
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+.env
+.env.*
+*.ini.local
+.DS_Store
+Thumbs.db
