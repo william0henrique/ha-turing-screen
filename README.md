@@ -32,6 +32,13 @@ O **HA Turing Screen** transforma uma tela USB Turing Smart Screen 3.5" (ou Xuan
 - **Atualização inteligente:** evita reenviar a imagem à tela quando o conteúdo não mudou.
 - **Pré-visualização:** gera imagens de exemplo com `--preview`, sem precisar conectar a tela.
 - **Configuração externa:** credenciais e entidades ficam em `ha_screen.ini`, ignorado pelo Git.
+- **Controles no Home Assistant Core:** package YAML para ligar/desligar a tela, ajustar o brilho, alternar o fundo de fotos e entrar no modo descanso.
+- **Fotos e modo descanso:** slideshow como papel de parede e tela ociosa com foto nítida, relógio e data.
+- **Notificações:** automações podem enviar avisos personalizados; dispositivos configurados também geram alertas discretos quando ficam indisponíveis.
+
+## 🏠 Integração Home Assistant Core
+
+Instale o package [`turing_screen.yaml`](turing_screen.yaml) e siga o [guia de instalação e notificações](INSTALAR_CONTROLES_HA.md). Para adicionar somente os controles à sua dashboard existente, use o [exemplo de cartão Lovelace](docs/examples/dashboard-card-tela-turing.yaml); ele não substitui a sua dashboard completa.
 
 ## 🧰 Requisitos
 
@@ -77,7 +84,7 @@ Edite `ha_screen.ini` com os dados da sua instalação. **Não compartilhe esse 
 | `[player] modo` | Layout do player | `mini` ou `tela_cheia` |
 | `[tailscale] ativar` | Exibir status do Tailscale | `sim` ou `nao` |
 
-Na seção `[entidades]`, informe os IDs das entidades que deseja exibir. Na seção `[luzes]`, configure até quatro entidades `light.*` ou `switch.*` e seus nomes de exibição. Os exemplos do arquivo de configuração devem ser substituídos pelos IDs reais da sua instalação.
+Na seção `[entidades]`, informe os IDs que deseja exibir. Câmeras podem ser configuradas em `cameras` e, opcionalmente, seus switches de privacidade em `camera_privacidade`; consulte o exemplo de INI. Na seção `[luzes]`, configure até quatro entidades `light.*` ou `switch.*` e seus nomes de exibição. Substitua os exemplos pelos IDs da sua instalação somente no `ha_screen.ini` local.
 
 Para criar um token, abra seu perfil no Home Assistant e procure **Tokens de acesso de longa duração** nas opções de segurança.
 

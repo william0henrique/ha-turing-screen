@@ -1,0 +1,213 @@
+input_boolean:
+  tela_turing_ligada:
+    name: Tela Turing ligada
+    icon: mdi:monitor
+    initial: true
+  fundo_fotos_tela:
+    name: Fundo com fotos da tela
+    icon: mdi:image-multiple
+    initial: true
+  modo_descanso_tela_turing:
+    name: Modo descanso da tela Turing
+    icon: mdi:clock-outline
+    initial: false
+
+input_number:
+  brilho_tela_turing:
+    name: Brilho da tela Turing
+    icon: mdi:brightness-6
+    min: 1
+    max: 100
+    step: 1
+    initial: 30
+    mode: slider
+  notificacao_tela_turing_id:
+    name: Sequência de notificações da tela Turing
+    min: 0
+    max: 999999
+    step: 1
+    mode: box
+
+input_text:
+  notificacao_tela_turing_titulo:
+    name: Título da notificação Turing
+    initial: Notificação
+    max: 60
+  notificacao_tela_turing_mensagem:
+    name: Mensagem da notificação Turing
+    initial: ""
+    max: 255
+  notificacao_tela_turing_estilo:
+    name: Estilo da notificação Turing
+    initial: '{"color":"#B07CF5","background_color":"#161820","title_color":"#F0F1F5","message_color":"#DCDEE6","font":"regular","title_size":14,"message_size":12,"duration":8,"position":"bottom","opacity":92}'
+    max: 255
+
+template:
+  - light:
+      - name: Tela Turing
+        unique_id: turing_screen_light
+        default_entity_id: light.tela_turing
+        icon: mdi:monitor
+        state: "{{ is_state('input_boolean.tela_turing_ligada', 'on') }}"
+        level: >-
+          {{ ((states('input_number.brilho_tela_turing') | float(30)) * 255 / 100) | round(0) | int }}
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.tela_turing_ligada
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.tela_turing_ligada
+        set_level:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.brilho_tela_turing
+            data:
+              value: "{{ ((brightness | float(0)) * 100 / 255) | round(0) }}"
+
+  - switch:
+      - name: Fundo com fotos da tela
+        unique_id: turing_screen_photo_background
+        default_entity_id: switch.fundo_fotos_tela
+        icon: mdi:image-multiple
+        state: "{{ is_state('input_boolean.fundo_fotos_tela', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.fundo_fotos_tela
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.fundo_fotos_tela
+      - name: Modo descanso da tela Turing
+        unique_id: turing_screen_screensaver_mode
+        default_entity_id: switch.modo_descanso_tela_turing
+        icon: mdi:clock-outline
+        state: "{{ is_state('input_boolean.modo_descanso_tela_turing', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.modo_descanso_tela_turing
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.modo_descanso_tela_turing
+
+script:
+  notificar_tela_turing:
+    alias: Notificar tela Turing
+    description: Mostra uma notificação temporária no painel Turing.
+    mode: queued
+    fields:
+      title:
+        name: Título
+        description: Título curto do aviso.
+        selector:
+          text:
+      message:
+        name: Mensagem
+        description: Texto exibido por alguns segundos no painel.
+        required: true
+        selector:
+          text:
+            multiline: true
+      color:
+        name: Cor de destaque
+        description: Cor CSS ou hexadecimal da borda e faixa lateral.
+        selector:
+          text:
+      background_color:
+        name: Cor de fundo
+        description: Cor CSS ou hexadecimal do cartão.
+        selector:
+          text:
+      title_color:
+        name: Cor do título
+        selector:
+          text:
+      message_color:
+        name: Cor da mensagem
+        selector:
+          text:
+      font:
+        name: Peso da fonte
+        description: Roboto regular ou negrito.
+        selector:
+          select:
+            options:
+              - regular
+              - bold
+      title_size:
+        name: Tamanho do título
+        selector:
+          number:
+            min: 10
+            max: 24
+            step: 1
+            mode: slider
+      message_size:
+        name: Tamanho da mensagem
+        selector:
+          number:
+            min: 9
+            max: 20
+            step: 1
+            mode: slider
+      duration:
+        name: Duração em segundos
+        selector:
+          number:
+            min: 1
+            max: 60
+            step: 1
+            mode: slider
+      position:
+        name: Posição do aviso
+        selector:
+          select:
+            options:
+              - bottom
+              - top
+      opacity:
+        name: Opacidade do fundo
+        selector:
+          number:
+            min: 20
+            max: 100
+            step: 1
+            unit_of_measurement: "%"
+            mode: slider
+    sequence:
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.notificacao_tela_turing_titulo
+        data:
+          value: "{{ (title | default('Notificação', true) | string)[:60] }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.notificacao_tela_turing_mensagem
+        data:
+          value: "{{ (message | default('', true) | string)[:255] }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.notificacao_tela_turing_estilo
+        data:
+          value: >-
+            {{ {
+              'color': (color | default('#B07CF5', true) | string)[:20],
+              'background_color': (background_color | default('#161820', true) | string)[:20],
+              'title_color': (title_color | default('#F0F1F5', true) | string)[:20],
+              'message_color': (message_color | default('#DCDEE6', true) | string)[:20],
+              'font': (font | default('regular', true) | string)[:12],
+              'title_size': [24, [10, title_size | default(14, true) | float(14)] | max] | min,
+              'message_size': [20, [9, message_size | default(12, true) | float(12)] | max] | min,
+              'duration': [60, [1, duration | default(8, true) | float(8)] | max] | min,
+              'position': (position | default('bottom', true) | string)[:10],
+              'opacity': [100, [20, opacity | default(92, true) | float(92)] | max] | min
+            } | to_json }}
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.notificacao_tela_turing_id
+        data:
+          value: "{{ ((states('input_number.notificacao_tela_turing_id') | int(0)) + 1) % 1000000 }}"

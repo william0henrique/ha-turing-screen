@@ -1,0 +1,11 @@
+type: entities
+title: Tela Turing
+show_header_toggle: false
+state_color: true
+entities:
+  - entity: light.tela_turing
+    name: Tela e brilho
+  - entity: switch.fundo_fotos_tela
+    name: Fundo com fotos
+  - entity: switch.modo_descanso_tela_turing
+    name: Modo descanso (foto + relógio)
