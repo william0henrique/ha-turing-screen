@@ -11,6 +11,7 @@ Usa a biblioteca de comunicacao do projeto turing-smart-screen-python
 """
 import argparse
 import configparser
+import colorsys
 import hashlib
 import io
 import json
@@ -68,7 +69,7 @@ class Config:
         ha, tela, ent = cp["ha"], cp["tela"], cp["entidades"]
         self.url = ha["url"].rstrip("/")
         self.token = ha["token"].strip()
-        self.every = int(ha.get("atualizar_seg", "10"))
+        self.every = max(1, int(ha.get("atualizar_seg", "2")))
         self.project = os.path.abspath(os.path.join(os.path.dirname(path), tela.get("projeto", ".")))
         self.port = tela.get("porta", "AUTO")
         self.revision = tela.get("revisao", "A").upper()
@@ -77,8 +78,14 @@ class Config:
         self.phone_name = ent.get("celular_nome", "Celular")
         self.phone_level = ent.get("celular_bateria", "").strip()
         self.phone_state = ent.get("celular_carregando", "").strip()
+        self.phone_alert_level = int(ent.get("celular_alerta_bateria", "10"))
+        alerts = cp["alertas"] if cp.has_section("alertas") else {}
+        self.alert_duration = max(1, int(alerts.get("duracao_seg", "7")))
+        self.alert_repeat = max(1, int(alerts.get("repetir_min", "30"))) * 60
         self.lights = [(k.strip(), v.strip()) for k, v in cp["luzes"].items()][:4] \
             if cp.has_section("luzes") else []
+        self.cameras = [(k.strip(), v.strip()) for k, v in cp["cameras"].items()] \
+            if cp.has_section("cameras") else []
         sp = cp["player"] if cp.has_section("player") else {}
         self.player = sp.get("entidade", "").strip()
         self.show_paused = sp.get("mostrar_pausado", "nao").strip().lower() in ("sim", "s", "true", "1", "yes")
@@ -120,15 +127,39 @@ def fetch(cfg):
     def state(eid):
         return st.get(eid, {}).get("state", "unavailable") if eid else "unavailable"
 
+    def light_rgb(attributes):
+        """Retorna a cor real anunciada pelo HA, em RGB, se a lâmpada for colorida."""
+        rgb = attributes.get("rgb_color")
+        try:
+            if rgb and len(rgb) >= 3:
+                return tuple(max(0, min(255, int(round(float(v))))) for v in rgb[:3])
+            hs = attributes.get("hs_color")
+            if hs and len(hs) >= 2:
+                r, g, b = colorsys.hsv_to_rgb((float(hs[0]) % 360) / 360,
+                                               max(0, min(100, float(hs[1]))) / 100, 1)
+                return tuple(int(round(v * 255)) for v in (r, g, b))
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return None
+
     lights = []
+    alerts = []
     for eid, name in cfg.lights:
         s = st.get(eid)
         on = bool(s) and s["state"] == "on"
         pct = None
         if on and s["attributes"].get("brightness") is not None:
             pct = round(s["attributes"]["brightness"] / 2.55)
-        lights.append({"name": name, "on": on, "pct": pct,
-                       "ok": bool(s) and s["state"] != "unavailable"})
+        ok = bool(s) and s["state"] not in ("unavailable", "unknown")
+        rgb = light_rgb(s.get("attributes", {})) if s else None
+        lights.append({"name": name, "on": on, "pct": pct, "ok": ok, "rgb": rgb})
+        if not ok:
+            alerts.append(f"{name}: indisponível")
+
+    for eid, name in cfg.cameras:
+        s = st.get(eid)
+        if not s or s["state"] in ("unavailable", "unknown"):
+            alerts.append(f"{name}: câmera indisponível")
 
     people = sorted((s["attributes"].get("friendly_name", eid.split(".", 1)[1]).split()[0],
                      s["state"] == "home")
@@ -140,6 +171,8 @@ def fetch(cfg):
         level = None
 
     net = {"on": True, "off": False}.get(state(cfg.internet))
+    if level is not None and level <= cfg.phone_alert_level and not (state(cfg.phone_state) == "charging"):
+        alerts.append(f"{cfg.phone_name}: bateria em {level}%")
 
     media = None
     s = st.get(cfg.player) if cfg.player else None
@@ -152,6 +185,7 @@ def fetch(cfg):
     return {
         "media": media,
         "lights": lights, "people": people, "net": net, "bat": level,
+        "alerts": alerts,
         "charging": state(cfg.phone_state) == "charging",
         "updates": sum(1 for e, s in st.items() if e.startswith("update.") and s["state"] == "on"),
         "tailscale": tailscale_info(cfg.tailscale_cmd) if (cfg.tailscale and not media) else None,
@@ -316,19 +350,46 @@ def render(data, online=True, now=None):
         lw = (W - 2 * m - (len(lights) - 1) * g) // len(lights)
         for i, l in enumerate(lights):
             x, on = m + i * (lw + g), l["on"]
+            lamp_color = tuple(l["rgb"]) if on and l.get("rgb") else None
             d.rounded_rectangle((x, ly, x + lw, ly + lh), radius=14, fill=YELLOW if on else TILE)
             d.text((x + 12, ly + 10), fit(d, l["name"], font(13), lw - 20), font=font(13),
                    fill=DARK if on else MUTED)
             val = "—" if not l["ok"] else (f"{l['pct']}%" if l["pct"] is not None else "On") \
                 if on else "Off"
-            d.text((x + 12, ly + lh - 24), val, font=font(26), fill=DARK if on else TXT, anchor="ls")
+            d.text((x + 12, ly + lh - 24), val, font=font(26),
+                   fill=DARK if on else TXT, anchor="ls")
             bx0, bx1, by = x + 12, x + lw - 12, ly + lh - 12
+            bar_bg = (200, 150, 30) if on else (50, 52, 62)
+            bar_fg = lamp_color if lamp_color else (DARK if on else (50, 52, 62))
             d.rounded_rectangle((bx0, by - 4, bx1, by), radius=2,
-                                fill=(200, 150, 30) if on else (50, 52, 62))
+                                fill=bar_bg)
             if on and l["pct"]:
                 d.rounded_rectangle((bx0, by - 4, bx0 + (bx1 - bx0) * l["pct"] // 100, by),
-                                    radius=2, fill=DARK)
+                                    radius=2, fill=bar_fg)
     return img
+
+
+def render_alert(img, alerts):
+    """Desenha um aviso compacto sobre a tela, sem alterar o layout de fundo."""
+    if not alerts:
+        return img
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(overlay)
+    x0, y0, x1, y1 = 26, 82, W - 26, H - 82
+    d.rounded_rectangle((x0 + 3, y0 + 5, x1 + 3, y1 + 5), radius=22, fill=(0, 0, 0, 150))
+    d.rounded_rectangle((x0, y0, x1, y1), radius=22, fill=(28, 26, 34, 248), outline=(240, 84, 84, 255), width=3)
+    d.rounded_rectangle((x0 + 15, y0 + 15, x0 + 21, y1 - 15), radius=3, fill=(240, 84, 84, 255))
+    d.ellipse((x0 + 34, y0 + 17, x0 + 61, y0 + 44), fill=(240, 84, 84, 255))
+    d.text((x0 + 47.5, y0 + 17), "!", font=font(20), fill=(255, 255, 255), anchor="mt")
+    d.text((x0 + 72, y0 + 18), "ATENÇÃO", font=font(18), fill=(255, 255, 255))
+    shown = alerts[:3]
+    for i, message in enumerate(shown):
+        d.text((x0 + 34, y0 + 58 + i * 26), fit(d, message, font(15, False), x1 - x0 - 52),
+               font=font(15, False), fill=(242, 224, 224))
+    if len(alerts) > 3:
+        d.text((x0 + 34, y1 - 26), f"e mais {len(alerts) - 3} alerta(s)",
+               font=font(12, False), fill=(190, 186, 198))
+    return Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
 
 
 _bg_cache = {}
@@ -490,7 +551,7 @@ def main():
         return
 
     cfg = Config(args.config)
-    if "COLE_SEU_TOKEN" in cfg.token:
+    if not cfg.token or cfg.token.startswith("COLE_"):
         sys.exit("Edite o ha_screen.ini e coloque seu token do Home Assistant.")
     if not os.path.isdir(os.path.join(cfg.project, "library")):
         sys.exit(f"Pasta do projeto da tela invalida: {cfg.project}\n"
@@ -516,6 +577,7 @@ def main():
     signal.signal(signal.SIGTERM, lambda *a: stop.append(1))
 
     data, online, last, next_fetch = None, True, None, 0
+    alert_signature, alert_until, next_reminder = None, 0.0, 0.0
     while not stop:
         if time.time() >= next_fetch:
             try:
@@ -527,6 +589,20 @@ def main():
             next_fetch = time.time() + (min(cfg.every, 5) if playing else cfg.every)
         full = data and data.get("media") and data.get("player_mode") == "tela_cheia"
         img = render_player(data["media"]) if full else render(data, online)
+        alerts = data.get("alerts", []) if data else []
+        now_mono = time.monotonic()
+        signature = tuple(alerts)
+        if not signature:
+            alert_signature, alert_until, next_reminder = None, 0.0, 0.0
+        elif signature != alert_signature:
+            alert_signature = signature
+            alert_until = now_mono + cfg.alert_duration
+            next_reminder = now_mono + cfg.alert_repeat
+        elif now_mono >= next_reminder:
+            alert_until = now_mono + cfg.alert_duration
+            next_reminder = now_mono + cfg.alert_repeat
+        if alerts and now_mono < alert_until:
+            img = render_alert(img, alerts)
         h = hashlib.md5(img.tobytes()).hexdigest()
         if h != last:  # so reenvia se mudou algo (evita piscar)
             lcd.DisplayPILImage(img, 0, 0)

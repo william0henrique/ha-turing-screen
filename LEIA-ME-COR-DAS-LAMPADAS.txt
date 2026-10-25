@@ -1,0 +1,5 @@
+COR DA BARRA DE STATUS DAS LAMPADAS
+
+Somente o preenchimento da barra de status usa a cor rgb_color ou hs_color atual que o Home Assistant informa para a lâmpada quando ligada. O número, o fundo e os demais elementos mantêm as cores originais.
+
+Para aplicar numa instalação existente, copie ha_screen.py para a pasta turing-smart-screen-python-main, substituindo o antigo, e reinicie o painel. Se usa TuringPainel.exe, gere novamente o executável no Windows com gerar_exe_windows.bat; o EXE antigo não incorpora as alterações automaticamente.

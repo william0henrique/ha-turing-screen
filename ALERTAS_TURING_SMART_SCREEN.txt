@@ -1,0 +1,38 @@
+ALERTAS PARA TURING SMART SCREEN
+
+Arquivo atualizado: ha_screen.py
+
+O aviso aparece sobre a interface atual da telinha por 7 segundos quando:
+- uma câmera listada na seção [cameras] está unavailable/unknown;
+- uma luz/LED listada na seção [luzes] está unavailable/unknown;
+- o nível do celular está em 10% ou menos e não está carregando.
+
+Se o mesmo conjunto de alertas continuar ativo, o aviso reaparece a cada 30 minutos.
+Quando o estado normaliza e depois volta a falhar, o aviso aparece imediatamente.
+Os alertas têm prioridade visual temporária também sobre o player em tela cheia.
+
+INSTALAÇÃO
+1. Faça backup do ha_screen.py atual.
+2. Substitua o ha_screen.py do seu projeto pelo arquivo fornecido aqui.
+3. No ha_screen.ini existente, mantenha suas seções atuais e adicione:
+
+   Em [entidades]:
+   celular_alerta_bateria = 10
+
+   Ao final do arquivo:
+   [cameras]
+   camera.camera_inteligente_com_botao_de_chamada = Campainha
+   camera.ekaza_camera_dome_nuvem = Câmera dome
+
+4. Mantenha em [luzes] somente os quatro dispositivos já identificados na dashboard
+   ou ajuste os nomes conforme desejar. A detecção de indisponibilidade vale para
+   todas as entidades cadastradas nessa seção.
+5. Reinicie o script da telinha.
+
+SEGURANÇA
+O RAR enviado continha um token de acesso de longa duração do Home Assistant.
+Revogue-o no Home Assistant (Perfil > Segurança) e gere outro token. Não compartilhe
+novamente o token e atualize o ha_screen.ini local com a credencial nova.
+
+A bateria crítica foi definida em <=10% (e somente quando não está carregando).
+Para mudar o limite, altere celular_alerta_bateria no ha_screen.ini.

@@ -1,10 +1,11 @@
-# Segurança
+# Security Policy
 
-Se encontrar uma vulnerabilidade, evite publicar tokens, credenciais ou detalhes exploráveis em uma issue pública. Entre em contato com o responsável pelo repositório por um canal privado disponibilizado no perfil do GitHub.
+## Supported Versions
 
-## Proteja sua configuração
+Only the latest version is supported.
+Users are advised to update to the latest version when available.
 
-- Mantenha `ha_screen.ini` fora do Git.
-- Não compartilhe tokens de acesso do Home Assistant.
-- Se um token for exposto acidentalmente, revogue-o no Home Assistant e gere outro.
-- Remova endereços privados e dados pessoais de logs antes de publicá-los.
+## Reporting a Vulnerability
+
+Please report any vulnerabilities to this repository following this guide:  
+https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability

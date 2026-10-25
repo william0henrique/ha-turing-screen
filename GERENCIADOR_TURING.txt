@@ -1,0 +1,32 @@
+GERENCIADOR DO TURING SMART SCREEN
+
+O SmartScreenManager.py é uma interface gráfica para Windows que configura a integração com o Home Assistant e inicia/para o painel sem abrir o Prompt de Comando.
+
+O QUE ELE CONFIGURA
+- URL e token de longa duração do Home Assistant; botão de teste de conexão (diferencia HTTP 401, erro de rede e sucesso).
+- Intervalo de atualização, porta COM, revisão e brilho da tela.
+- Sensores do telefone, limite de bateria crítica, duração e repetição dos avisos.
+- Lista de luzes/LEDs (máximo de 4 cartões) e câmeras monitoradas, editável no formato entity_id = nome.
+- Player, modo mini/tela cheia, dados Tailscale e opção de abrir o código ha_screen.py.
+- Botões para salvar, iniciar a telinha em segundo plano e parar o processo.
+
+PARA GERAR O EXE NO WINDOWS
+1. Extraia o projeto completo para C:\tela\turing-smart-screen-python-modificado\turing-smart-screen-python-main.
+2. Confirme que o arquivo ha_screen.ini está nessa pasta e que em [tela] projeto aponta para ela.
+3. Instale Python 3.10 ou mais recente para Windows, marcando “Add Python to PATH” durante a instalação.
+4. Dê dois cliques em gerar_exe_windows.bat. O script instalará PyInstaller e as bibliotecas necessárias e compilará os programas.
+5. No final, serão gerados dist\TuringSmartManager.exe e dist\TuringPainel.exe. Mantenha os dois na mesma pasta. O gerenciador abrirá automaticamente.
+6. Se o Windows Defender SmartScreen avisar que o aplicativo não é reconhecido, isso pode acontecer porque o executável foi compilado localmente e não é assinado. Só execute se tiver baixado o projeto desta conversa e confiar no conteúdo.
+
+USO
+- Execute dist\TuringSmartManager.exe.
+- Escolha a pasta turing-smart-screen-python-main (o caminho já vem preenchido para o local informado).
+- Na aba Home Assistant, confirme URL e token. Use Testar conexão: HTTP 401 significa token inválido/revogado/incorreto; erro de conexão normalmente significa URL, rede ou Tailscale.
+- Edite as abas Tela e alertas / O que aparece; clique Salvar e depois Iniciar tela.
+- O programa grava turing_panel.log na pasta do projeto para diagnóstico. Nunca compartilhe ha_screen.ini: ele contém o token.
+
+SEGURANÇA
+O token é salvo em texto no ha_screen.ini, pois o painel precisa dele para consultar a API local do Home Assistant. Use um token de longa duração dedicado e revogue-o se for exposto. Não cole token em mensagens ou capturas de tela.
+
+NOTA SOBRE O EXE
+Este pacote inclui o gerador do executável, mas o .exe de Windows precisa ser compilado no Windows. O arquivo .bat faz essa compilação nesse próprio computador e produz os dois executáveis sem exigir comandos manuais. O SmartScreenManager.py também pode ser iniciado com Python 3 se preferir testar sem compilar.

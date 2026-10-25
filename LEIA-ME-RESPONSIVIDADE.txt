@@ -1,0 +1,9 @@
+ATUALIZAR A TELA MAIS RAPIDO
+
+O projeto agora usa 2 segundos como intervalo padrão de consulta ao Home Assistant, e o gerenciador também sugere 2 segundos em uma configuração nova.
+
+Para uma instalação que já existe, abra o gerenciador, vá à aba Home Assistant, altere “Intervalo de consulta (segundos)” para 2 e clique em Salvar. Depois pare e inicie novamente o painel. A API REST do Home Assistant será consultada a cada dois segundos; o painel ainda envia imagem à tela somente quando o conteúdo muda.
+
+Atenção: diminuir o intervalo aumenta as consultas feitas ao Home Assistant. Se preferir reduzir a carga, use 3, 5 ou 10 segundos.
+
+Se utiliza TuringPainel.exe, rode gerar_exe_windows.bat novamente no Windows para recompilar o executável com o novo código.
