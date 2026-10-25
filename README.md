@@ -1,163 +1,149 @@
-<div align="center">
-  <img src="docs/banner.svg" alt="HA Turing Screen — Home Assistant on your Turing Smart Screen" width="100%">
+# ![Icon](https://raw.githubusercontent.com/mathoudebine/turing-smart-screen-python/main/res/icons/monitor-icon-17865/24.png) turing-smart-screen-python
 
-  <h1>HA Turing Screen</h1>
-  <p><strong>Seu Home Assistant, direto na tela Turing Smart Screen 3.5”.</strong></p>
-  <p>Um painel compacto em Python com estado da casa, luzes, bateria, conectividade, Tailscale e mini-player de música.</p>
+> [!WARNING]
+> 
+> This project is **not affiliated, associated, authorized, endorsed by, or in any way officially connected with Turing / XuanFang / Kipye brands**, or any of theirs subsidiaries, affiliates, manufacturers or sellers of their products. All product and company names are the registered trademarks of their original owners.
+> 
+> This project is an open-source alternative software, NOT the original software provided for the smart screens. **Please do not open issues for USBMonitor.exe/ExtendScreen.exe or for the smart screens hardware here**.
+> * for Turing Smart Screen, use the official forum here: http://discuz.turzx.com/
+> * for other smart screens, contact your reseller
 
-  ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
-  ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-compatible-18BCF2?logo=homeassistant&logoColor=white)
-  ![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?logo=windows&logoColor=white)
-  ![License](https://img.shields.io/badge/License-MIT-34D399.svg)
-</div>
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black) ![Windows](https://img.shields.io/badge/Windows%2010%2F11-0078D6?style=for-the-badge&logoColor=white&logo=data:image/svg%2bxml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+V2luZG93czwvdGl0bGU+PHBhdGggZmlsbCA9ICIjRkZGRkZGIiBkPSJNMCwwSDExLjM3N1YxMS4zNzJIMFpNMTIuNjIzLDBIMjRWMTEuMzcySDEyLjYyM1pNMCwxMi42MjNIMTEuMzc3VjI0SDBabTEyLjYyMywwSDI0VjI0SDEyLjYyMyIvPjwvc3ZnPg==) [![macOS](https://img.shields.io/badge/mac%20os%20(⚠️major%20bug)-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mathoudebine/turing-smart-screen-python/issues/7) ![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-A22846?style=for-the-badge&logo=Raspberry%20Pi&logoColor=white) ![Python](https://img.shields.io/badge/Python-3.X-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) [![Licence](https://img.shields.io/github/license/mathoudebine/turing-smart-screen-python?style=for-the-badge)](./LICENSE)
+  
+A Python system monitor program and an abstraction library for **small IPS USB-C displays.**    
 
----
+Supported operating systems : macOS, Windows, Linux (incl. Raspberry Pi), basically all OS that support Python 3.9+  
 
-## ✨ Visão geral
+## Integração personalizada com Home Assistant
 
-O **HA Turing Screen** transforma uma tela USB Turing Smart Screen 3.5" (ou XuanFang 3.5") em um pequeno painel para acompanhar informações importantes da sua casa inteligente.
+Esta versão completa também inclui o painel `ha_screen.py` e o gerenciador gráfico `SmartScreenManager.py`. O painel consulta o Home Assistant por padrão a cada 2 segundos, mostra avisos de câmeras/luzes indisponíveis e de bateria baixa do celular por 7 segundos, e os repete a cada 30 minutos enquanto a condição continuar. A cor dinâmica das lâmpadas coloridas afeta somente a barra de status.
 
-| Painel de status | Mini-player | Player em tela cheia |
-|:---:|:---:|:---:|
-| ![Painel de status](docs/preview.png) | ![Mini-player](docs/preview_player.png) | ![Player em tela cheia](docs/preview_player_cheio.png) |
-| Estado da casa e Tailscale | Música, artista e capa | Capa e informações da faixa |
+### Preparação rápida no Windows
 
-## 🚀 Funcionalidades
+1. Copie `config.yaml.example` para `config.yaml` se for usar o monitor de sistema original; esse arquivo local é ignorado pelo Git.
+2. Copie `ha_screen.example.ini` para `ha_screen.ini` e edite a URL, o token de longa duração e os IDs das entidades. O INI também é local e ignorado pelo Git; nunca publique o token.
+3. Instale as dependências com `pip install -r requirements.txt`.
+4. Execute `python SmartScreenManager.py` para configurar e iniciar a tela, ou `python ha_screen.py --config ha_screen.ini` para iniciar o painel diretamente.
+5. Para gerar os executáveis no Windows, execute `gerar_exe_windows.bat`; os arquivos resultantes ficam em `dist/` e não são versionados.
 
-- **Home Assistant:** consulta estados por meio da API REST.
-- **Status da casa:** hora, pessoas em casa, luzes, internet, bateria do celular e atualizações pendentes — conforme as entidades configuradas.
-- **Spotify e media players:** exibe capa, música e artista quando o player escolhido está tocando.
-- **Dois modos de player:** `mini` e `tela_cheia`.
-- **Tailscale:** mostra o IP e a quantidade de dispositivos online quando não há música tocando.
-- **Atualização responsiva:** consulta o Home Assistant a cada 2 segundos por padrão e evita reenviar a imagem quando o conteúdo não mudou.
-- **Alertas na tela:** avisa sobre câmeras ou luzes indisponíveis e bateria baixa do celular; cada aviso dura 7 segundos e se repete a cada 30 minutos enquanto a condição persistir.
-- **Barra de cor:** a barra de status de lâmpadas coloridas usa `rgb_color`/`hs_color` do Home Assistant.
-- **Gerenciador gráfico:** edita conexão, token, entidades e alertas e inicia/para o painel sem abrir o terminal.
-- **Pré-visualização:** gera imagens de exemplo com `--preview`, sem precisar conectar a tela.
-- **Configuração externa:** credenciais e entidades ficam em `ha_screen.ini`, ignorado pelo Git.
+### ✅ Supported smart screens models:
 
-## 🧰 Requisitos
+| ✅ Turing Smart Screen / TURZX                                                                                                                                                                                                                                                                                                                                                                  |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| <img src="res/docs/turing.webp" width="30%" height="30%"/> <img src="res/docs/turing46inch.png" width="30%" height="30%"/> <img src="res/docs/turing5inch.png" width="30%" height="30%"/> <br/> <img src="res/docs/turing2inch.webp" width="30%" height="30%"/> <img src="res/docs/turing8inch.png" width="30%" height="30%"/> <img src="res/docs/turing8inch.webp" width="30%" height="30%"/> |
+| All available sizes and hardware revisions supported: **2.1" / 2.8" / 3.5" / 4.6" / 5" / 5.2" / 8.0" / 8.8" / 9.2" / 12.3"** <br/>UART and USB protocols supported. Note: no video or storage support for now                                                                                                                                                                                  |
 
-- Windows e Python **3.10 ou superior**.
-- Turing Smart Screen 3.5" Rev. A ou XuanFang 3.5" Rev. B, conectada por USB.
-- Home Assistant acessível pela rede local, VPN ou Tailscale.
-- Repositório de comunicação da tela: [`turing-smart-screen-python`](https://github.com/mathoudebine/turing-smart-screen-python).
+| ✅ XuanFang 3.5"                                   | ✅ [UsbPCMonitor 3.5" / 5"](https://aliexpress.com/item/1005003931363455.html)                       | ✅ Kipye Qiye Smart Display 3.5"                                                  |
+|---------------------------------------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| <img src="res/docs/xuanfang.webp"/>               | <img src="res/docs/UsbPCMonitor_5inch.webp" width="60%" height="60%"/>                              | <img src="res/docs/kipye-qiye-35.webp" width="60%" height="60%"/>                |
+| revision B & flagship (with backplate & RGB LEDs) | Unknown manufacturer, visually similar to Turing 3.5" / 5". Original software is `UsbPCMonitor.exe` | Front panel has an engraved inscription "奇叶智显" Qiye Zhixian (Qiye Smart Display) |
 
-## 📦 Instalação
+| ✅ WeAct Studio Display FS V1 0.96"                            | ✅ WeAct Studio Display FS V1 3.5"                            |
+|---------------------------------------------------------------|--------------------------------------------------------------|
+| <img src="res/docs/weact_0.96.jpg" width="60%" height="60%"/> | <img src="res/docs/weact_3.5.png" width="60%" height="60%"/> |
 
-### 1. Baixe os projetos
+<details>
 
-Baixe este repositório e extraia-o. Baixe também o projeto [`turing-smart-screen-python`](https://github.com/mathoudebine/turing-smart-screen-python) e extraia-o, por exemplo, em `C:\tela\turing-smart-screen-python-main`.
+<summary><h3>❌ Not (yet) supported / not tested smart screen models</h3></summary>
 
-### 2. Instale as dependências deste projeto
+| ❔ _AIDA64 / AX206 / USB2LCD..._                                                                                                                                                                        | ❔ _[ACEMAGIC S1 Mini PC - integrated 1,9″ display](https://acemagic.com/products/acemagic-s1-12th-alder-laker-n95-mini-pc)_                                  |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| <img src="res/docs/ax206.jpg" width="45%" height="45%" /> <img src="res/docs/geekteches_ad35.jpg" width="45%" height="45%" /> <br/> <img src="res/docs/smartcool_lcd.webp" width="45%" height="45%" /> | <img src="res/docs/acemagic-s1-mini.jpg"/>                                                                                                                   |
+| Not supported for now. Produced by multiple manufacturers, all use the same [Appotech AX206 hacked photo frame firmware](https://github.com/dreamlayers/dpf-ax). Supported by AIDA64 and lcd4linux     | Not supported for now but could be integrated: protocol has been decoded, [see here](https://github.com/mathoudebine/turing-smart-screen-python/issues/677). |
 
-Abra o Prompt de Comando na pasta deste repositório:
+| ❔ _NXElec BeadaPanel 3/4/5/6/7_                                                                                                                                                                                                                                                                                           |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| <img src="res/docs/beadapanel-3.jpg" width="30%" height="30%" /> <img src="res/docs/beadapanel-5s.jpg" width="30%" height="30%" /> <img src="res/docs/beadapanel-6.jpg" width="30%" height="30%" />                                                                                                                       |
+| Not supported for now but could be integrated: [Pankel-Link V1.0 Protocol Specification](https://www.nxelec.com/documents/bp/Panel-Link_USB_Media_Stream_Transport_Protocol_Rev10.pdf) / [Status-Link V1.1 Protocol Specification](https://www.nxelec.com/documents/bp/Status-Link_USB_Panel_Control_Protocol_Rev11.pdf). |
 
-```bat
-python -m pip install -r requirements.txt
-```
+| ❌ _Waveshare [2.1inch](https://www.waveshare.com/wiki/2.1inch-USB-Monitor) / [2.8inch](https://www.waveshare.com/wiki/2.8inch-USB-Monitor) / [5inch](https://www.waveshare.com/wiki/5inch-USB-Monitor) / [7inch](https://www.waveshare.com/wiki/7inch-USB-Monitor) USB-Monitor_                                                                                                            | ❌ _[GUITION Smart screen 3.5"](https://aliexpress.com/item/1005006169962183.html)_                                                                                                                                                                                                          |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| <img src="res/docs/waveshare-21inch-28inch.png"/>                                                                                                                                                                                                                                                                                                                                          | <img src="res/docs/guition.webp"/>                                                                                                                                                                                                                                                          |
+| Sold on [Waveshare shop](https://www.waveshare.com/2.8inch-usb-monitor.htm) or [Aliexpress](https://fr.aliexpress.com/item/1005006071685067.html). Managed by [proprietary Windows software "Waveshare PC Monitor"](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Vendor-apps#waveshare-pc-monitor---vendor-app). Cannot be supported by this project: needs a firmware. | Managed by [proprietary Windows software "GUITION Smart screen"](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Vendor-apps#guition---vendor-app). Cannot be supported by this project: [see here](https://github.com/mathoudebine/turing-smart-screen-python/issues/426). |
 
-> **Importante:** use o `requirements.txt` deste repositório para instalar as dependências do painel. Não substitua pelo arquivo do projeto original da tela.
+| ❌ _[(Fuldho?) 3.5" IPS Screen](https://aliexpress.com/item/1005005632018367.html)_                                                                                                                                                     |
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| <img src="res/docs/fuldho_3.5.jpg" width="40%" height="40%" />                                                                                                                                                                         |
+| Managed by [proprietary Windows software `SmartMonitor.exe`](https://smartdisplay.lanzouo.com/b04jvavkb). Cannot be supported by this project: [see here](https://github.com/mathoudebine/turing-smart-screen-python/discussions/298). |
 
-### 3. Crie a configuração local
+</details>
 
-```bat
-copy ha_screen.example.ini ha_screen.ini
-notepad ha_screen.ini
-```
+### [> What is my smart screen model?](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Hardware-revisions)  
 
-Edite `ha_screen.ini` com os dados da sua instalação. **Não compartilhe esse arquivo:** ele pode conter seu token de acesso ao Home Assistant.
+**Please note all listed smart screens are different products** designed and produced by different companies, despite having a similar appearance. Their communication protocol is also different.  
+This project offers an abstraction layer to manage all of these products in a unified way, including some product-specific features like backplate RGB LEDs for available models!
 
-| Configuração | Descrição | Exemplo |
-|---|---|---|
-| `[ha] url` | URL do Home Assistant | `http://homeassistant.local:8123` |
-| `[ha] token` | Token de acesso de longa duração | `COLE_SEU_TOKEN_AQUI` |
-| `[ha] atualizar_seg` | Intervalo de consulta em segundos | `2` |
-| `[tela] projeto` | Pasta do projeto de comunicação da tela | `C:\tela\turing-smart-screen-python-main` |
-| `[tela] porta` | Porta serial da tela ou detecção automática | `COM3` ou `AUTO` |
-| `[tela] revisao` | Revisão do hardware | `A` ou `B` |
-| `[tela] brilho` | Brilho entre 0 e 100 | `30` |
-| `[player] entidade` | Entidade `media_player` a exibir | `media_player.spotify_seu_usuario` |
-| `[player] modo` | Layout do player | `mini` ou `tela_cheia` |
-| `[tailscale] ativar` | Exibir status do Tailscale | `sim` ou `nao` |
+If you haven't received your screen yet but want to start developing your theme now, you can use the [**"simulated LCD" mode!**](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Simulated-display)
 
-Na seção `[entidades]`, informe os IDs dos sensores do celular e da internet, incluindo `celular_alerta_bateria` (10% por padrão). Na seção `[luzes]`, configure até quatro entidades `light.*` ou `switch.*`; na seção `[cameras]`, liste as câmeras a monitorar. A seção `[alertas]` permite ajustar duração e intervalo de repetição. Substitua os exemplos pelos IDs reais da sua instalação.
+## How to start
 
-Para criar um token, abra seu perfil no Home Assistant e procure **Tokens de acesso de longa duração** nas opções de segurança.
+### [> Follow instructions on the wiki to configure and start this project.](https://github.com/mathoudebine/turing-smart-screen-python/wiki)
 
-### 4. Execute o painel
+There are 2 possible uses of this project Python code:
+* **[as a System Monitor](#system-monitor)**, a standalone program working with themes to display your computer HW info and custom data in an elegant way.
+[Check if your hardware is supported.](https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-hardware-support)
+* **[integrated in your project](#control-the-display-from-your-python-projects)**, to fully control the display from your own Python code.
 
-```bat
-python ha_screen.py
-```
+## System monitor
 
-Para gerar imagens de demonstração sem a tela conectada:
+This project is mainly a complete standalone program to use your screen as a system monitor, like the original vendor app.  
+Some themes are already included for a quick start!  
+### [> Configure and start system monitor](https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-how-to-start)
+<img src="res/docs/config_wizard.png"/>  
 
-```bat
-python ha_screen.py --preview
-```
+* Fully functional multi-OS code base (operates out of the box, tested on Windows, Linux & MacOS).
+* Display configuration using GUI configuration wizard or `config.yaml` file: no Python code to edit.
+* Compatible with [multiple smart screen models (Turing, XuanFang...)](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Hardware-revisions). Backplate RGB LEDs are also supported for available models!
+* Support [multiple hardware sensors and metrics (CPU/GPU usage, temperatures, memory, disks, etc)](https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-themes#stats-entry) with configurable refresh intervals.
+* Allow [creation of themes (see `res/themes`) with `theme.yaml` files using theme editor](https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-themes) to be [shared with the community!](https://github.com/mathoudebine/turing-smart-screen-python/discussions/categories/themes)
+* Easy to expand: [custom Python data sources](https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-themes#add-custom-stats-to-a-theme) can be written to pull specific information and display it on themes like any other sensor.
+* Auto-detect COM port based on the selected smart screen model.
+* Tray icon with Exit option, useful when the program is running in background.
 
-Para usar outro arquivo de configuração:
+### [> List and preview of included themes](res/themes/themes.md)
+<img src="res/themes/3.5inchTheme2/preview.png" height="150" /> <img src="res/themes/Terminal/preview.png" height="150" /> <img src="res/themes/Cyberpunk-net/preview.png" height="150" /> <img src="res/themes/bash-dark-green-gpu/preview.png" height="150" /> <img src="res/themes/Landscape6Grid/preview.png" width="150" /> <img src="res/themes/LandscapeMagicBlue/preview.png" width="150" /> <img src="res/themes/LandscapeEarth/preview.png" width="150" /> ... [view full list](res/themes/themes.md)
+### [> Themes creation/edition (using theme editor)](https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-themes)
+### [> Themes shared by the community](https://github.com/mathoudebine/turing-smart-screen-python/discussions/categories/themes)
+<img src="https://user-images.githubusercontent.com/79225820/203648707-6f043068-5c9d-454d-9c0a-3d9ea02ece77.jpg" height="150" /> <img src="https://user-images.githubusercontent.com/121983479/210663324-994c987a-6489-4482-8883-db74ef566014.jpg" height="150" />
+<img src="https://user-images.githubusercontent.com/120036534/208128675-897f60cd-5647-40b7-b074-b56b67e775dd.png" height="150" /> <img src="https://user-images.githubusercontent.com/65172896/217549510-149913ac-ef4e-4f61-8f5e-6d768483a02c.png" height="150" /> and more... Share yours!
 
-```bat
-python ha_screen.py --config caminho\para\config.ini
-```
+## Control the display from your Python projects
 
-### Gerenciador gráfico e executável do Windows
+If you don't want to use your screen for system monitoring, you can just use this project as a module from any Python code to do some simple operations on the display:
+- **Display custom picture**
+- **Display text**
+- **Display horizontal / radial progress bar**
+- **Screen rotation**
+- Clear the screen (blank)
+- Turn the screen on/off
+- Display soft reset
+- Set brightness
+- Set backplate RGB LEDs color (on supported hardware rev.) 
 
-Para abrir a interface de configuração, execute `python SmartScreenManager.py`. Ela permite testar a conexão, editar URL/token e entidades, ajustar os alertas, salvar e iniciar ou parar o painel. Para criar o gerenciador `.exe`, dê dois cliques em `gerar_exe_windows.bat`; ele cria `dist\TuringSmartManager.exe` e copia o script do painel ao lado. O painel inicia sem janela de terminal, usando `pythonw.exe` instalado no Windows. O projeto original de comunicação com o display e suas dependências continuam necessários.
+This project will act as an abstraction library to handle specific protocols and capabilities of each supported smart screen models in a transparent way for the user.
+Check `simple-program.py` as an example.
 
-**Antes de executar:** feche outros programas que estejam usando a tela, incluindo o utilitário do fabricante. A porta COM geralmente só pode ser usada por um programa de cada vez.
+### [> Control the display from your code](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Control-screen-from-your-own-code)
 
-## 🪟 Iniciar automaticamente com o Windows
+## Troubleshooting
+If you have trouble running the program as described in the wiki, please check [open/closed issues](https://github.com/mathoudebine/turing-smart-screen-python/issues) & [the wiki Troubleshooting page](https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting)
 
-É possível iniciar o script sem abrir uma janela de terminal usando o Agendador de Tarefas:
+## They're talking about it!
 
-1. Abra **Agendador de Tarefas** e selecione **Criar Tarefa**.
-2. Em **Disparadores**, crie um disparador **Ao fazer logon**.
-3. Em **Ações**, selecione **Iniciar um programa**.
-4. Em **Programa/script**, informe o caminho completo para `pythonw.exe` (normalmente dentro da instalação do Python).
-5. Em **Adicionar argumentos**, informe o caminho completo para `ha_screen.py`.
-6. Em **Iniciar em**, informe a pasta do projeto.
-7. Salve e teste a tarefa. Se necessário, execute primeiro com `python ha_screen.py` para conferir os erros.
+* [Hackaday - Cheap LCD Uses USB Serial](https://hackaday.com/2023/09/11/cheap-lcd-uses-usb-serial/)  
 
-> Dica: `pythonw.exe` não exibe o terminal. Durante o diagnóstico, prefira `python.exe` para conseguir ler as mensagens de erro.
 
-## 🛠️ Solução de problemas
+* [CNX Software - Turing Smart Screen – A low-cost 3.5-inch USB Type-C information display](https://www.cnx-software.com/2022/04/29/turing-smart-screen-a-low-cost-3-5-inch-usb-type-c-information-display/)
 
-| Problema | O que verificar |
-|---|---|
-| `Cannot find command 'git'` ou dependências inesperadas | Confirme que instalou o `requirements.txt` deste repositório. |
-| Porta COM ocupada ou acesso negado | Feche o software do fabricante e outros programas que usam a tela. |
-| Tela preta ou sem resposta | Confira `porta`, `revisao` e o caminho em `projeto`. Teste `porta = AUTO`. |
-| “Sem conexão com o HA” | Verifique URL, token, rede e acesso à API pelo computador. |
-| Tailscale não detectado | Instale o Tailscale ou configure o caminho para `tailscale.exe` em `comando`. |
-| Aviso de otimizações do NumPy / CPU antiga | Mantenha a faixa `numpy<2.4` definida no `requirements.txt`. |
-| O painel não inicia ao entrar no Windows | Revise os caminhos da tarefa agendada e teste temporariamente com `python.exe`. |
 
-Se o problema continuar, abra uma [issue](../../issues) com a mensagem de erro e os passos para reproduzi-lo. **Remova tokens, URLs privadas e outros dados sensíveis antes de publicar logs.**
+* [Phazer Tech - Turing Smart Screen Python ](https://phazertech.com/tutorials/turing-smart-screen.html)
 
-## 🧩 Personalização
+## Star History
 
-As opções de configuração ficam em `ha_screen.ini`. A renderização visual está no arquivo `ha_screen.py`, incluindo a função `render()` e as cores definidas no código. Use `--preview` para testar alterações de layout sem conectar a tela.
-
-## 🤝 Contribuindo
-
-Sugestões, correções e melhorias são bem-vindas. Antes de abrir uma contribuição:
-
-1. Descreva o problema ou a melhoria.
-2. Teste a alteração localmente sempre que possível.
-3. Não inclua tokens, credenciais ou dados pessoais.
-4. Consulte [`CONTRIBUTING.md`](CONTRIBUTING.md) para orientações.
-
-## 🙏 Créditos e licença
-
-- A comunicação com a tela utiliza o projeto [`turing-smart-screen-python`](https://github.com/mathoudebine/turing-smart-screen-python), que deve ser baixado separadamente.
-- Este repositório é distribuído sob a licença [MIT](LICENSE).
-- Projeto independente, sem vínculo oficial com Turing/TURZX ou com o Home Assistant.
-
----
-
-<div align="center">
-  Feito para deixar o status da casa sempre à vista. 🏠
-</div>
+<a href="https://www.star-history.com/?repos=mathoudebine%2Fturing-smart-screen-python&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=mathoudebine/turing-smart-screen-python&type=date&theme=dark&legend=top-left&sealed_token=1BULWtfZBsenXy6zd-C2Td6C9UGczg0IYaXK8qrDQy2yhkZvBSdB0kZ5ufjXAD_6CCCaT_VYzmD5XqpPAQwYhe0tlrxJfnRax70YliRnMnqqW2FjVnNEEw9yqhXZir4mhQsrMy4JyyiCdP_BT2yKw8GeVlIcxfxqo6MRk7v0-w-nVPm6bexDVxyG-KPC" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=mathoudebine/turing-smart-screen-python&type=date&legend=top-left&sealed_token=1BULWtfZBsenXy6zd-C2Td6C9UGczg0IYaXK8qrDQy2yhkZvBSdB0kZ5ufjXAD_6CCCaT_VYzmD5XqpPAQwYhe0tlrxJfnRax70YliRnMnqqW2FjVnNEEw9yqhXZir4mhQsrMy4JyyiCdP_BT2yKw8GeVlIcxfxqo6MRk7v0-w-nVPm6bexDVxyG-KPC" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=mathoudebine/turing-smart-screen-python&type=date&legend=top-left&sealed_token=1BULWtfZBsenXy6zd-C2Td6C9UGczg0IYaXK8qrDQy2yhkZvBSdB0kZ5ufjXAD_6CCCaT_VYzmD5XqpPAQwYhe0tlrxJfnRax70YliRnMnqqW2FjVnNEEw9yqhXZir4mhQsrMy4JyyiCdP_BT2yKw8GeVlIcxfxqo6MRk7v0-w-nVPm6bexDVxyG-KPC" />
+ </picture>
+</a>

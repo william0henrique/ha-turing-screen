@@ -21,6 +21,15 @@ def app_dir():
     return Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 
 
+def default_project():
+    current = app_dir()
+    if (current / "library").is_dir():
+        return str(current)
+    if (current.parent / "library").is_dir():
+        return str(current.parent)
+    return DEFAULT_PROJECT
+
+
 def bool_yes(value):
     return str(value).strip().lower() in ("sim", "s", "true", "1", "yes", "on")
 
@@ -68,7 +77,7 @@ class Manager:
         project_row = ttk.Frame(outer)
         project_row.pack(fill="x", pady=(0, 12))
         ttk.Label(project_row, text="Pasta do projeto:").pack(side="left")
-        self.project_var = tk.StringVar(value=DEFAULT_PROJECT)
+        self.project_var = tk.StringVar(value=default_project())
         ttk.Entry(project_row, textvariable=self.project_var).pack(side="left", fill="x", expand=True, padx=8)
         ttk.Button(project_row, text="Procurar…", command=self._browse_project).pack(side="left")
 
@@ -166,8 +175,8 @@ class Manager:
 
     def _project(self):
         p = Path(self.project_var.get().strip().strip('"'))
-        if not (p / "library").is_dir() or not (p / "res" / "fonts" / "roboto").is_dir():
-            raise FileNotFoundError(f"Não encontrei a biblioteca da tela e as fontes em:\n{p}\n\nEscolha a pasta do projeto turing-smart-screen-python.")
+        if not (p / "ha_screen.py").is_file():
+            raise FileNotFoundError(f"Não encontrei ha_screen.py em:\n{p}\n\nEscolha a pasta turing-smart-screen-python-main.")
         return p
 
     def _config_path(self):
@@ -294,7 +303,7 @@ class Manager:
         threading.Thread(target=work,daemon=True).start()
 
     def _panel_exe(self):
-        candidates=[app_dir()/"TuringPainel.exe"]
+        candidates=[app_dir()/"TuringPainel.exe",self._project()/"TuringPainel.exe",self._project()/"dist"/"TuringPainel.exe"]
         return next((p for p in candidates if p.is_file()),None)
 
     def _pythonw(self):
@@ -322,13 +331,9 @@ class Manager:
         else:
             py=self._pythonw()
             if not py:
-                messagebox.showerror("Python não encontrado","Instale Python 3 para Windows e marque Add Python to PATH. Depois reabra o gerenciador.")
+                messagebox.showerror("Python não encontrado","Instale Python para Windows ou gere TuringPainel.exe usando gerar_exe_windows.bat.")
                 return
-            panel_script=app_dir()/"ha_screen.py"
-            if not panel_script.is_file():
-                messagebox.showerror("Script do painel não encontrado",f"Não encontrei {panel_script}")
-                return
-            cmd=[py,str(panel_script),"--config",str(ini)]
+            cmd=[py,str(project/"ha_screen.py"),"--config",str(ini)]
         try:
             log=(project/"turing_panel.log").open("a",encoding="utf-8")
             kwargs={"cwd":str(project),"stdout":log,"stderr":subprocess.STDOUT}
@@ -363,7 +368,7 @@ class Manager:
 
     def _open_code(self):
         try:
-            path=app_dir()/"ha_screen.py"
+            path=self._project()/"ha_screen.py"
             if os.name=="nt": os.startfile(str(path))
             else: subprocess.Popen(["xdg-open",str(path)])
         except Exception as e: messagebox.showerror("Erro",str(e))
