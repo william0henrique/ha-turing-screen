@@ -9,3 +9,6 @@ venv/
 *.ini.local
 .DS_Store
 Thumbs.db
+dist/
+build/
+*.exe

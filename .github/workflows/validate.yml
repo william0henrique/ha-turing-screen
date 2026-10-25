@@ -15,4 +15,4 @@ jobs:
         with:
           python-version: "3.12"
       - name: Verificar sintaxe Python
-        run: python -m py_compile ha_screen.py
+        run: python -m py_compile ha_screen.py SmartScreenManager.py

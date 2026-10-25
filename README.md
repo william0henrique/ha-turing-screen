@@ -29,7 +29,10 @@ O **HA Turing Screen** transforma uma tela USB Turing Smart Screen 3.5" (ou Xuan
 - **Spotify e media players:** exibe capa, música e artista quando o player escolhido está tocando.
 - **Dois modos de player:** `mini` e `tela_cheia`.
 - **Tailscale:** mostra o IP e a quantidade de dispositivos online quando não há música tocando.
-- **Atualização inteligente:** evita reenviar a imagem à tela quando o conteúdo não mudou.
+- **Atualização responsiva:** consulta o Home Assistant a cada 2 segundos por padrão e evita reenviar a imagem quando o conteúdo não mudou.
+- **Alertas na tela:** avisa sobre câmeras ou luzes indisponíveis e bateria baixa do celular; cada aviso dura 7 segundos e se repete a cada 30 minutos enquanto a condição persistir.
+- **Barra de cor:** a barra de status de lâmpadas coloridas usa `rgb_color`/`hs_color` do Home Assistant.
+- **Gerenciador gráfico:** edita conexão, token, entidades e alertas e inicia/para o painel sem abrir o terminal.
 - **Pré-visualização:** gera imagens de exemplo com `--preview`, sem precisar conectar a tela.
 - **Configuração externa:** credenciais e entidades ficam em `ha_screen.ini`, ignorado pelo Git.
 
@@ -69,6 +72,7 @@ Edite `ha_screen.ini` com os dados da sua instalação. **Não compartilhe esse 
 |---|---|---|
 | `[ha] url` | URL do Home Assistant | `http://homeassistant.local:8123` |
 | `[ha] token` | Token de acesso de longa duração | `COLE_SEU_TOKEN_AQUI` |
+| `[ha] atualizar_seg` | Intervalo de consulta em segundos | `2` |
 | `[tela] projeto` | Pasta do projeto de comunicação da tela | `C:\tela\turing-smart-screen-python-main` |
 | `[tela] porta` | Porta serial da tela ou detecção automática | `COM3` ou `AUTO` |
 | `[tela] revisao` | Revisão do hardware | `A` ou `B` |
@@ -77,7 +81,7 @@ Edite `ha_screen.ini` com os dados da sua instalação. **Não compartilhe esse 
 | `[player] modo` | Layout do player | `mini` ou `tela_cheia` |
 | `[tailscale] ativar` | Exibir status do Tailscale | `sim` ou `nao` |
 
-Na seção `[entidades]`, informe os IDs das entidades que deseja exibir. Na seção `[luzes]`, configure até quatro entidades `light.*` ou `switch.*` e seus nomes de exibição. Os exemplos do arquivo de configuração devem ser substituídos pelos IDs reais da sua instalação.
+Na seção `[entidades]`, informe os IDs dos sensores do celular e da internet, incluindo `celular_alerta_bateria` (10% por padrão). Na seção `[luzes]`, configure até quatro entidades `light.*` ou `switch.*`; na seção `[cameras]`, liste as câmeras a monitorar. A seção `[alertas]` permite ajustar duração e intervalo de repetição. Substitua os exemplos pelos IDs reais da sua instalação.
 
 Para criar um token, abra seu perfil no Home Assistant e procure **Tokens de acesso de longa duração** nas opções de segurança.
 
@@ -98,6 +102,10 @@ Para usar outro arquivo de configuração:
 ```bat
 python ha_screen.py --config caminho\para\config.ini
 ```
+
+### Gerenciador gráfico e executável do Windows
+
+Para abrir a interface de configuração, execute `python SmartScreenManager.py`. Ela permite testar a conexão, editar URL/token e entidades, ajustar os alertas, salvar e iniciar ou parar o painel. Para criar o gerenciador `.exe`, dê dois cliques em `gerar_exe_windows.bat`; ele cria `dist\TuringSmartManager.exe` e copia o script do painel ao lado. O painel inicia sem janela de terminal, usando `pythonw.exe` instalado no Windows. O projeto original de comunicação com o display e suas dependências continuam necessários.
 
 **Antes de executar:** feche outros programas que estejam usando a tela, incluindo o utilitário do fabricante. A porta COM geralmente só pode ser usada por um programa de cada vez.
 
